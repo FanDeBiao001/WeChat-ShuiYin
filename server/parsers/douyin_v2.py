@@ -4,6 +4,7 @@ import re
 
 from server.parsers.base import BaseParser, ParsedVideo
 from server.utils.http_client import build_client
+from server.utils.exceptions import ParseError
 from server.utils.text_extractor import match_first
 
 logger = logging.getLogger(__name__)
@@ -308,14 +309,14 @@ class DouyinV2Parser(BaseParser):
         if not video_id:
             video_id = await self.extract_video_id(raw_url)
         if not video_id:
-            raise ValueError(f"无法从链接中提取视频ID: {resolved_url}")
+            raise ParseError("VIDEO_ID_NOT_FOUND", "无法从分享链接中识别视频编号。", status_code=422)
 
         logger.info("提取到视频ID: %s", video_id)
 
         # 2. 获取iesdouyin分享页面
         html = await self._fetch_video_page(video_id)
         if not html:
-            raise ValueError("获取分享页面失败")
+            raise ParseError("SHARE_PAGE_UNAVAILABLE", "当前无法读取视频分享页。", status_code=502)
 
         # 3. 提取ROUTER_DATA
         router_data = self._extract_router_data(html)
@@ -328,7 +329,7 @@ class DouyinV2Parser(BaseParser):
         # 4. 提取视频详情
         detail = self._extract_video_detail(router_data)
         if not detail:
-            raise ValueError("无法从页面数据中提取视频详情")
+            raise ParseError("VIDEO_DETAIL_UNAVAILABLE", "当前服务器未能获取该视频详情。", status_code=422)
 
         # 5. 提取基本信息
         title = detail.get("desc", "")
@@ -343,7 +344,7 @@ class DouyinV2Parser(BaseParser):
         video_url, backup_urls = self._extract_best_video_url(detail)
 
         if not video_url:
-            raise ValueError("无法提取视频地址")
+            raise ParseError("VIDEO_NOT_FOUND", "页面未提供可播放的视频地址。", status_code=422)
 
         # 7. 构建结果
         # 主视频地址（优先无水印）

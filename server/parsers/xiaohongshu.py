@@ -2,6 +2,7 @@ import logging
 import re
 
 from server.parsers.base import BaseParser, ParsedVideo
+from server.utils.http_client import build_client
 from server.utils.exceptions import ParseError
 from server.utils.text_extractor import match_first
 
@@ -22,12 +23,21 @@ class XiaoHongShuParser(BaseParser):
         - backupUrls: 备用视频地址列表
         - 小红书视频通常没有平台水印，masterUrl即为无水印版本
         """
-        # 小红书需要PC端UA和Cookie才能获取完整页面数据
-        html = await self.fetch_html(resolved_url, headers={
+        headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
             "Referer": "https://www.xiaohongshu.com/",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        })
+        }
+        async with build_client() as client:
+            response = await client.get(resolved_url, headers=headers)
+            response.raise_for_status()
+            if response.url.path.startswith("/login"):
+                raise ParseError(
+                    code="LOGIN_REQUIRED",
+                    message="该笔记要求登录后查看，当前服务无法获取视频。",
+                    status_code=422,
+                )
+            html = response.text
 
         title = self.extract_meta(html, "og:title") or match_first(
             html,
@@ -57,7 +67,6 @@ class XiaoHongShuParser(BaseParser):
             [
                 r'"masterUrl"\s*:\s*"([^"]+)"',
                 r'"h264"\s*:\s*\[\s*\{[^}]*?"masterUrl"\s*:\s*"([^"]+)"',
-                r'"originVideoKey"\s*:\s*"([^"]+)"',
             ],
         )
 
@@ -93,12 +102,13 @@ class XiaoHongShuParser(BaseParser):
             )
             watermark_url = watermark_url or no_watermark_url
 
+        if no_watermark_url and not no_watermark_url.startswith(("https://", "http://")):
+            no_watermark_url = ""
         if not no_watermark_url:
             raise ParseError(
                 code="VIDEO_NOT_FOUND",
-                message="小红书页面结构已变化，暂时未提取到可播放视频地址。",
+                message="该笔记未提供可公开获取的视频地址，或当前不支持其页面格式。",
                 status_code=422,
-                details={"resolved_url": resolved_url},
             )
 
         return ParsedVideo(

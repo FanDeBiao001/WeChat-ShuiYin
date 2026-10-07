@@ -4,6 +4,7 @@ import re
 
 from server.parsers.base import BaseParser, ParsedVideo
 from server.utils.douyin_sign import generate_a_bogus
+from server.utils.exceptions import ParseError
 from server.utils.http_client import build_client
 
 logger = logging.getLogger(__name__)
@@ -334,7 +335,7 @@ class DouyinApiParser(BaseParser):
         if not video_id:
             video_id = await self.extract_video_id(raw_url)
         if not video_id:
-            raise ValueError(f"无法从链接中提取视频ID: {resolved_url}")
+            raise ParseError("VIDEO_ID_NOT_FOUND", "无法从分享链接中识别视频编号。", status_code=422)
 
         logger.info("使用官方API解析，视频ID: %s", video_id)
 
@@ -372,7 +373,7 @@ class DouyinApiParser(BaseParser):
         no_watermark_url, _ = self._extract_best_video_url(detail)
 
         if not no_watermark_url:
-            raise ValueError("无法从官方API提取视频地址")
+            raise ParseError("VIDEO_NOT_FOUND", "平台未提供可播放的视频地址。", status_code=422)
 
         # 确保有水印地址不为空（回退到无水印地址）
         if not watermark_url:

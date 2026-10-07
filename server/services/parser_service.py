@@ -54,9 +54,19 @@ class ParserService:
                     no_watermark_verified = True
             elif mode == "auto":
                 # 先尝试自有解析
-                parsed_video = await self.parsers[platform].parse(raw_url, resolved_url)
+                try:
+                    parsed_video = await self.parsers[platform].parse(raw_url, resolved_url)
+                except (AppError, httpx.HTTPError, ValueError) as exc:
+                    if not self.third_party_service.is_configured():
+                        raise
+                    logger.warning("%s 自有解析失败（%s），尝试备用解析", platform, type(exc).__name__)
+                    parsed_video = await self.third_party_service.parse(raw_url)
+                    if not parsed_video:
+                        raise
+                    parse_source = "fallback"
+                    no_watermark_verified = bool(parsed_video.no_watermark_video_url)
                 # 抖音平台：官方API返回的play_addr即为无水印地址，直接信任
-                if platform == "douyin" and parsed_video:
+                if parse_source == "native" and platform == "douyin" and parsed_video:
                     no_watermark_verified = True
                     # 若自有解析未获取到无水印地址，尝试第三方兜底
                     if not parsed_video.no_watermark_video_url and self.third_party_service.is_configured():
@@ -65,7 +75,7 @@ class ParserService:
                         if third_party_result:
                             parsed_video = third_party_result
                             parse_source = "fallback"
-                elif platform in ("kuaishou", "xiaohongshu") and parsed_video:
+                elif parse_source == "native" and platform in ("kuaishou", "xiaohongshu") and parsed_video:
                     # 快手/小红书：自有解析已提取无水印地址，标记为已验证
                     if parsed_video.no_watermark_video_url:
                         no_watermark_verified = True
@@ -142,6 +152,13 @@ class ParserService:
             )
         except AppError:
             raise
+        except ValueError as exc:
+            logger.warning("视频页面缺少可解析数据: %s", type(exc).__name__)
+            raise ParseError(
+                code="VIDEO_DETAIL_UNAVAILABLE",
+                message="当前服务器未能获取该视频详情，请稍后重试或更换已授权的素材。",
+                status_code=422,
+            ) from exc
         except httpx.HTTPStatusError as exc:
             logger.exception("Remote service returned an invalid status")
             raise ParseError(
