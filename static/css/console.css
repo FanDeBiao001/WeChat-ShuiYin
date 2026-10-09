@@ -1,0 +1,459 @@
+/* ==========================================================================
+   Media Parser Console - Tailwind Companion & Dynamic Component Styles
+   Lightweight utilities and keyframe animations complementing Tailwind CSS CDN
+   ========================================================================== */
+
+/* Custom Scrollbars */
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
+}
+
+/* ==========================================================================
+   Bulletproof Switch Toggle Component
+   ========================================================================== */
+.switch-toggle {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+.switch-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.switch-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 9999px;
+}
+.switch-slider::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
+}
+.switch-toggle input:checked + .switch-slider {
+  background-color: #4f46e5;
+}
+.switch-toggle input:checked + .switch-slider::before {
+  transform: translateX(18px);
+}
+.switch-toggle input:focus-visible + .switch-slider {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+}
+
+
+/* ==========================================================================
+   Interactive Custom Select Menus (Table Manager)
+   ========================================================================== */
+.custom-select-wrap {
+  position: relative;
+  display: inline-block;
+}
+.custom-select-wrap.w-full,
+.custom-select-wrap.w-full-wrap {
+  display: block;
+  width: 100%;
+}
+.custom-select-wrap.w-full .custom-select-btn,
+.custom-select-wrap.w-full-wrap .custom-select-btn {
+  width: 100%;
+}
+.custom-select-wrap.w-full .custom-select-popover,
+.custom-select-wrap.w-full-wrap .custom-select-popover {
+  width: 100%;
+  max-width: 100%;
+}
+.custom-select-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #334155;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+.custom-select-btn:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+.custom-select-btn-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.custom-select-btn-chevron {
+  transition: transform 0.2s ease;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+.custom-select-wrap.open .custom-select-btn-chevron {
+  transform: rotate(180deg);
+}
+
+/* ==========================================================================
+   Date Range Picker & Filter Toolbar Controls (Unified 32px Height)
+   ========================================================================== */
+.date-range-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+.date-range-group input[type="date"] {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 12px;
+  color: #334155;
+  box-sizing: border-box;
+}
+.date-range-group input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+  padding: 0;
+  margin-left: 2px;
+}
+.date-range-group input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.9;
+}
+.table-filter-form .filter-input-text {
+  height: 32px;
+  box-sizing: border-box;
+}
+.table-filter-form .btn-small {
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.custom-select-popover {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  max-width: 280px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  padding: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.custom-select-wrap.open .custom-select-popover {
+  display: block;
+}
+.custom-select-wrap.drop-up .custom-select-popover {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+.custom-select-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #475569;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.1s ease;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.custom-select-item:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+.custom-select-item.active {
+  background-color: #eef2ff;
+  color: #4f46e5;
+  font-weight: 600;
+}
+.custom-select-item-check {
+  display: none;
+  color: #4f46e5;
+  flex-shrink: 0;
+}
+.custom-select-item.active .custom-select-item-check {
+  display: block;
+}
+.custom-select-group-header {
+  padding: 8px 10px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.025em;
+  user-select: none;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 4px;
+}
+.custom-select-group-header:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 4px;
+}
+
+/* ==========================================================================
+   Table Batch Select Dropdown & Floating Toolbar
+   ========================================================================== */
+.batch-select-dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.batch-select-dropdown .batch-dropdown-trigger {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 2px;
+}
+.batch-select-dropdown .batch-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 105px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  z-index: 40;
+  padding: 4px;
+  white-space: nowrap;
+}
+.batch-select-dropdown.open .batch-dropdown-menu {
+  display: block;
+}
+.batch-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #475569;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+.batch-dropdown-item:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.batch-floating-toolbar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translate(-50%, 24px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 40;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.batch-floating-toolbar.show {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   SVG Charts & Tooltips
+   ========================================================================== */
+.chart-container {
+  position: relative;
+  width: 100%;
+}
+.chart-guide-line {
+  pointer-events: none;
+}
+.chart-hover-dot {
+  pointer-events: none;
+}
+.chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 30;
+  display: none;
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  transition: left 0.06s ease, opacity 0.12s ease, transform 0.12s ease;
+  transform: translateY(4px);
+}
+.chart-tooltip.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+.chart-tooltip .tt-title {
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: #475569;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 4px;
+  font-size: 11.5px;
+}
+.chart-tooltip .tt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 3px;
+  color: #475569;
+  font-size: 12px;
+}
+.chart-tooltip .tt-row strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+.chart-tooltip .tt-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.pie-slice {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+  cursor: pointer;
+  transform-origin: 100px 100px;
+}
+.pie-slice:hover, .pie-slice.active {
+  transform: scale(1.04);
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+.pie-pill-item {
+  transition: all 0.15s ease;
+}
+.pie-pill-item:hover,
+.pie-pill-item.active {
+  background-color: #f1f5f9;
+  color: #0f172a !important;
+  font-weight: 600;
+}
+.pie-pill-item.active span:first-child {
+  transform: scale(1.25);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.25);
+}
+
+/* ==========================================================================
+   Modal Dialogs & Toasts
+   ========================================================================== */
+#confirm-modal-backdrop.open {
+  display: flex !important;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.toast-bubble {
+  animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   Code Syntax Highlighting (Clean Minimalist Light Theme)
+   ========================================================================== */
+.hl-cmd { color: #2563eb; font-weight: 600; }
+.hl-kw { color: #e11d48; font-weight: 600; }
+.hl-type { color: #7c3aed; }
+.hl-str { color: #0969da; }
+.hl-cmt { color: #8c959f; font-style: italic; }
+.hl-num { color: #d97706; }
+.hl-var { color: #0f172a; font-weight: 500; }
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+/* Hide number input spinners for clean inline unit badges */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}

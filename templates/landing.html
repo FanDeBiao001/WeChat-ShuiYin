@@ -1,0 +1,1208 @@
+<!doctype html>
+{% macro icon(name, class_name='w-4 h-4') -%}
+<svg class="{{ class_name }}" aria-hidden="true" focusable="false"><use href="{{ url_for('static', filename='icons.svg') }}#icon-{{ name }}"></use></svg>
+{%- endmacro %}
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Media Parser 提供多平台视频、图文、音频解析能力与简单易用的 API 接口。">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" sizes="32x32">
+    <title>Media Parser API - 多平台媒体解析服务</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{colors:{brand:'#4f46e5'},fontFamily:{sans:['Inter','ui-sans-serif','system-ui']}}}}</script>
+    <style>
+        body{background:#fff}.grid-bg{background-image:linear-gradient(rgba(15,23,42,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(15,23,42,.035) 1px,transparent 1px);background-size:42px 42px}.glow{background:radial-gradient(circle,rgba(79,70,229,.1),transparent 68%)}.code-shadow{box-shadow:0 24px 70px rgba(30,41,59,.12),0 0 0 1px rgba(15,23,42,.06)}.custom-scroll::-webkit-scrollbar{width:6px;height:6px}.custom-scroll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+    </style>
+</head>
+<body class="font-sans text-slate-700 antialiased selection:bg-indigo-100 selection:text-indigo-900">
+    <div class="fixed inset-0 grid-bg pointer-events-none"></div><div class="fixed -top-40 right-0 w-[620px] h-[620px] glow pointer-events-none"></div>
+    <header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto min-h-16 px-5 sm:px-8 py-3 flex items-center justify-between gap-4">
+            <a href="#top" class="flex items-center gap-3 shrink-0" aria-label="Media Parser 首页"><img src="{{ url_for('static', filename='images/logo-web.png') }}" alt="" class="w-9 h-9 rounded-xl border border-slate-200 bg-white p-1"><span class="hidden sm:inline font-bold tracking-tight text-slate-950">Media Parser <span class="text-brand">API</span></span></a>
+            <nav class="hidden lg:flex items-center gap-8 text-sm text-slate-600"><a href="#parser" class="hover:text-brand">在线解析</a><a href="#capabilities" class="hover:text-brand">平台能力</a><a href="#deployment" class="hover:text-brand">部署方式</a><a href="#docs" class="hover:text-brand">接入示例</a><a href="#faq" class="hover:text-brand">常见问题</a></nav>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="https://github.com/ucmao/media-parser" target="_blank" rel="noopener noreferrer" aria-label="在 GitHub 查看 Media Parser 源码" title="GitHub 开源仓库" class="inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition shadow-sm">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" class="w-4 h-4 fill-slate-900"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.74-1.55-2.57-.3-5.27-1.29-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.07.79 2.16v3.2c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
+                    <span id="navStarBadge" class="hidden items-center gap-2">
+                        <span class="w-px h-3.5 bg-slate-200"></span>
+                        <span class="inline-flex items-center gap-1 font-bold text-slate-700">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" class="w-3.5 h-3.5 fill-amber-400 stroke-amber-500"><path d="m12 2.5 2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.3l-5.8 3.06 1.11-6.46-4.7-4.58 6.49-.94L12 2.5Z" stroke-width="1"/></svg>
+                            <span id="navGithubStars"></span>
+                        </span>
+                    </span>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="hidden sm:inline text-sm font-medium text-slate-600 hover:text-brand">登录</a><a href="{{ url_for('auth.register') }}" class="rounded-lg bg-brand px-3 sm:px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 transition"><span class="sm:hidden">注册</span><span class="hidden sm:inline">创建账号</span></a>
+            </div>
+        </div>
+    </header>
+    <main id="top" class="relative">
+        <section class="max-w-7xl mx-auto px-5 sm:px-8 pt-16 lg:pt-24 pb-16">
+            <div class="grid lg:grid-cols-[1.05fr_.95fr] gap-12 lg:gap-16 items-center">
+                <div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="https://github.com/ucmao/media-parser" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 transition">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" class="w-4 h-4 fill-slate-900"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.74-1.55-2.57-.3-5.27-1.29-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.07.79 2.16v3.2c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
+                            <span>Star on GitHub</span>
+                            <span id="starCountBadge" class="hidden items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" class="w-3.5 h-3.5 fill-amber-400 stroke-amber-500"><path d="m12 2.5 2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.3l-5.8 3.06 1.11-6.46-4.7-4.58 6.49-.94L12 2.5Z" stroke-width="1"/></svg>
+                                <span id="githubStars"></span>
+                            </span>
+                        </a>
+                    </div>
+                    <h1 class="mt-7 text-4xl sm:text-5xl lg:text-6xl leading-[1.1] font-black tracking-[-.045em] text-slate-950">多平台媒体解析，<br><span class="text-brand">一个接口就够了。</span></h1>
+                    <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-600">输入任意支持平台的分享链接，统一获取视频、图集、封面、音频与作者信息。无需浏览器环境，既可在线使用，也可通过 API 接入你的业务。</p>
+                    <div class="mt-8 flex flex-wrap items-center gap-4"><a href="#parser" class="rounded-xl bg-brand px-6 py-3 font-bold text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">立即在线解析</a><a href="#docs" class="rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-800 hover:border-indigo-300 hover:text-brand transition">查看 API 示例</a></div>
+                    <div class="mt-9 flex flex-wrap gap-x-7 gap-y-3 text-sm text-slate-500"><span class="inline-flex items-center gap-1.5">{{ icon('check', 'w-4 h-4 text-emerald-500') }}统一 JSON 返回</span><span class="inline-flex items-center gap-1.5">{{ icon('check', 'w-4 h-4 text-emerald-500') }}API Key 鉴权</span><span class="inline-flex items-center gap-1.5">{{ icon('check', 'w-4 h-4 text-emerald-500') }}独立 QPS 限制</span></div>
+                </div>
+                <div class="code-shadow rounded-2xl overflow-hidden border border-slate-200 bg-white">
+                    <div class="h-12 px-4 flex items-center justify-between border-b border-slate-200 bg-slate-50"><div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="w-3 h-3 rounded-full bg-emerald-400"></span></div><span class="text-xs text-slate-500 font-mono">GET /api/v1/parse</span></div>
+                    <div class="p-6 sm:p-7 font-mono text-sm leading-7 overflow-x-auto custom-scroll text-slate-700"><div><span class="text-violet-700">curl</span> <span class="text-slate-500">--get</span> <span class="text-emerald-700">'https://your-domain.com/api/v1/parse'</span> \</div><div class="pl-4"><span class="text-slate-500">--header</span> <span class="text-emerald-700">'Authorization: Bearer mp-xxx'</span> \</div><div class="pl-4"><span class="text-slate-500">--data-urlencode</span> <span class="text-emerald-700">'url=https://v.douyin.com/xxx/'</span></div><div class="my-5 border-t border-slate-200"></div><div class="text-slate-400">{</div><div class="pl-4"><span class="text-sky-700">"succ"</span>: <span class="text-indigo-700">true</span>,</div><div class="pl-4"><span class="text-sky-700">"data"</span>: {</div><div class="pl-8"><span class="text-sky-700">"platform"</span>: <span class="text-emerald-700">"抖音"</span>,</div><div class="pl-8"><span class="text-sky-700">"video_url"</span>: <span class="text-emerald-700">"https://..."</span>,</div><div class="pl-8"><span class="text-sky-700">"image_list"</span>: []</div><div class="pl-4">}</div><div class="text-slate-400">}</div></div>
+                </div>
+            </div>
+        </section>
+        <section id="parser" class="border-y border-slate-200 bg-slate-50/80"><div class="max-w-5xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+            <div class="max-w-2xl"><p class="font-mono text-sm font-semibold text-brand">LIVE PARSER</p><h2 class="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-slate-950">粘贴链接，立即解析</h2><p class="mt-3 text-slate-600 text-base leading-7">支持分享短链和包含链接的完整分享文案。</p></div>
+            <div class="mt-8 rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-sm">
+                {% if not parser_enabled %}
+                <div class="mb-4 rounded-xl border border-amber-200/70 bg-amber-50/50 px-4 py-3 text-xs sm:text-sm text-amber-900 flex items-center gap-2.5">
+                    {{ icon('alert', 'w-4 h-4 text-amber-600 shrink-0') }}
+                    <span><strong>在线体验维护中：</strong>当前在线解析体验已暂停服务，您仍可通过下方 API 文档接入调用。</span>
+                </div>
+                {% endif %}
+                <label for="parseUrl" class="sr-only">媒体分享链接</label>
+                <input type="text" id="hpWebsite" name="website" style="display:none !important; opacity:0; position:absolute; left:-9999px" tabindex="-1" autocomplete="off">
+                <textarea id="parseUrl" rows="3" maxlength="2000" {{ 'disabled' if not parser_enabled }} placeholder="{{ '粘贴抖音、快手、小红书、B站等平台的分享链接或文案' if parser_enabled else '在线解析体验当前处于维护状态，暂时无法提交…' }}" class="w-full resize-none rounded-xl border border-slate-200 {{ 'bg-slate-100/70 text-slate-400 placeholder:text-slate-400/80 cursor-not-allowed' if not parser_enabled else 'bg-slate-50/50 hover:bg-slate-50 focus:bg-white text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10' }} px-4 py-3.5 text-sm sm:text-base leading-relaxed outline-none transition-all"></textarea>
+                <div class="mt-4 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+                    {% if parser_enabled %}
+                    <button id="parseBtn" onclick="handleParse()" class="inline-flex items-center justify-center rounded-xl bg-brand px-6 py-2.5 font-semibold text-sm text-white shadow-sm shadow-indigo-500/25 hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none transition-all">开始解析</button>
+                    <button onclick="pasteFromClipboard()" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-semibold text-sm text-slate-700 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all shadow-2xs">粘贴内容</button>
+                    <button onclick="clearParser()" class="inline-flex items-center justify-center rounded-xl px-4 py-2.5 font-medium text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-100/60 active:scale-[0.98] transition-all">清空</button>
+                    {% else %}
+                    <button id="parseBtn" disabled class="inline-flex items-center justify-center rounded-xl bg-slate-100 border border-slate-200 px-6 py-2.5 font-semibold text-sm text-slate-400 cursor-not-allowed">服务维护中</button>
+                    <button disabled class="inline-flex items-center justify-center rounded-xl border border-slate-100 bg-slate-50 px-4 py-2.5 font-semibold text-sm text-slate-400 cursor-not-allowed">粘贴内容</button>
+                    <a href="#docs" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-semibold text-sm text-slate-700 hover:border-indigo-300 hover:text-brand transition shadow-2xs">查看 API 接入说明</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div id="loadingState" class="hidden mt-6 rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 text-center text-sm font-medium text-slate-600 shadow-sm"><span class="inline-block w-4 h-4 mr-2.5 align-middle rounded-full border-2 border-slate-200 border-t-indigo-600 animate-spin"></span>正在识别平台并获取媒体信息…</div>
+            <!-- 友好型解析提示/错误状态卡片 -->
+            <div id="errorState" class="hidden mt-6 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-sm transition-all duration-200">
+                <div class="flex items-start gap-4">
+                    <div class="shrink-0 w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20 flex items-center justify-center">
+                        {{ icon('alert', 'w-5 h-5') }}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                            <h4 id="errorTitle" class="text-[15px] font-semibold text-slate-900 leading-snug">暂时无法解析该内容</h4>
+                            <span id="errorTag" class="hidden rounded-full border border-slate-200 bg-slate-100/80 px-2.5 py-0.5 text-xs font-medium text-slate-600"></span>
+                        </div>
+                        <p id="errorMsg" class="mt-1 text-sm text-slate-600 leading-relaxed"></p>
+                        <div id="errorHintBox" class="mt-3.5 rounded-xl border border-amber-200/80 bg-amber-50/70 px-3.5 py-2.5 text-xs leading-5 text-amber-900 flex items-start gap-2">
+                            <span class="font-semibold text-amber-900 shrink-0">排查建议</span>
+                            <span class="text-amber-400/80 shrink-0">·</span>
+                            <span id="errorHint" class="flex-1 text-amber-800"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 解析结果区（支持视觉预览与 JSON 模式切换） -->
+            <div id="resultState" class="hidden mt-6 rounded-2xl border border-indigo-200 bg-white overflow-hidden shadow-sm">
+                <!-- 头部卡片：第一行 Meta/按钮，第二行 独占文案区 -->
+                <div class="p-5 sm:p-6 border-b border-slate-200 bg-slate-50/50 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 flex-wrap min-w-0">
+                            <span id="resultPlatform" class="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-brand border border-indigo-100/80"></span>
+                            <img id="resultAuthorAvatar" src="" alt="" referrerpolicy="no-referrer" class="hidden h-7 w-7 shrink-0 rounded-full border border-slate-200 bg-slate-100 object-cover">
+                            <span id="resultAuthor" class="text-xs font-medium text-slate-500"></span>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button onclick="copyCurrentJson()" class="whitespace-nowrap shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-indigo-300 hover:text-brand transition shadow-sm flex items-center gap-1.5">
+                                {{ icon('clipboard', 'w-4 h-4') }} 复制完整 JSON
+                            </button>
+                            <button onclick="copyFormattedResult()" class="whitespace-nowrap shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-indigo-300 hover:text-brand transition shadow-sm flex items-center gap-1.5">
+                                {{ icon('clipboard', 'w-4 h-4') }} 格式化复制
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 id="resultTitle" class="text-base font-semibold leading-relaxed text-slate-900 break-words max-h-40 overflow-y-auto custom-scroll"></h3>
+                        <div id="resultDesc" class="hidden mt-3 border-l-2 border-indigo-200 pl-3 text-sm leading-6 text-slate-600 break-words whitespace-pre-wrap max-h-40 overflow-y-auto custom-scroll"><span id="resultDescText"></span></div>
+                    </div>
+                </div>
+
+                <!-- 视图切换选项卡 -->
+                <div class="px-5 sm:px-7 pt-4 pb-1 flex items-center gap-6 border-b border-slate-200 text-sm font-medium">
+                    <button id="tabVisual" onclick="switchResultTab('visual')" class="py-2.5 border-b-2 border-brand text-brand font-bold transition">视觉媒体预览</button>
+                    <button id="tabJson" onclick="switchResultTab('json')" class="py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-900 transition">JSON 原始结构</button>
+                </div>
+
+                <!-- 视觉媒体预览区 -->
+                <div id="viewVisual" class="p-5 sm:p-7 space-y-6">
+                    <!-- 视频播放栏 -->
+                    <div id="videoContainer" class="hidden scroll-mt-24">
+                        <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                            <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">{{ icon('video', 'w-4 h-4 text-slate-500') }} 视频文件预览 (<span id="videoCount">0</span>)</h4>
+                            <div class="flex items-center gap-2">
+                                <a id="videoOpenDirectLink" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:border-indigo-300 hover:text-brand transition shadow-sm" title="在新窗口中打开当前视频">{{ icon('link', 'w-3.5 h-3.5') }}新窗口打开</a>
+                                <button type="button" onclick="copyCurrentVideoUrl()" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:border-indigo-300 hover:text-brand transition shadow-sm" title="复制当前视频直链">{{ icon('clipboard', 'w-3.5 h-3.5') }}复制直链</button>
+                                <button id="previousVideoBtn" type="button" onclick="stepVideo(-1)" class="hidden rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:border-indigo-300 hover:text-brand disabled:cursor-not-allowed disabled:opacity-40 transition">← 上一个</button>
+                                <button id="nextVideoBtn" type="button" onclick="stepVideo(1)" class="hidden rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:border-indigo-300 hover:text-brand disabled:cursor-not-allowed disabled:opacity-40 transition">下一个 →</button>
+                            </div>
+                        </div>
+                        <div class="relative aspect-video w-full overflow-hidden rounded-2xl bg-slate-950 shadow-sm">
+                            <!-- 原生视频播放器 -->
+                            <video id="videoPlayer" controls playsinline preload="metadata" referrerpolicy="no-referrer" class="absolute inset-0 h-full w-full bg-black object-contain"></video>
+
+                            <!-- 播放受限 / 降级封面与占位容器 (极简现代风) -->
+                            <div id="videoFallbackContainer" class="absolute inset-0 hidden select-none overflow-hidden bg-slate-950 group/fallback">
+                                <!-- 封面图背景高斯模糊（填满 16:9 比例） -->
+                                <img id="videoCoverBg" src="" alt="" aria-hidden="true" referrerpolicy="no-referrer" class="absolute inset-0 hidden h-full w-full object-cover scale-125 blur-2xl opacity-35 brightness-75 pointer-events-none">
+                                
+                                <!-- 居中封面主体（保持原比例不失真） -->
+                                <img id="videoCoverImg" src="" alt="视频封面" referrerpolicy="no-referrer" class="absolute inset-0 z-10 hidden h-full w-full object-contain pointer-events-none drop-shadow-2xl">
+                                
+                                <!-- 兜底通用占位图（无封面或封面加载失败时） -->
+                                <img id="videoDefaultPlaceholder" src="{{ url_for('static', filename='images/video-placeholder.svg') }}" alt="已成功解析视频，但当前浏览器无法预览" class="absolute inset-0 z-10 hidden h-full w-full object-cover pointer-events-none">
+
+                                <!-- 半透明暗色微遮罩层 -->
+                                <div class="absolute inset-0 z-20 bg-slate-950/30 backdrop-blur-[0.5px] pointer-events-none transition duration-300 group-hover/fallback:bg-slate-950/40"></div>
+
+                                <!-- 中央核心交互区：大播放按钮 + 极简轻量文案 (点击整块区域在新窗口播放) -->
+                                <a id="videoFallbackPlayBtn" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" class="group/btn absolute inset-0 z-30 flex flex-col items-center justify-center p-4 text-center cursor-pointer text-white no-underline" title="在新窗口中播放视频" aria-label="在新窗口中播放视频">
+                                    <div class="flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/25 backdrop-blur-md border border-white/40 shadow-2xl text-white transition-all duration-300 group-hover/btn:scale-110 group-hover/btn:bg-white/35 active:scale-95 mb-2.5">
+                                        <svg class="w-7 h-7 sm:w-8 sm:h-8 translate-x-0.5 fill-white drop-shadow" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+                                    </div>
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 px-3.5 py-1 text-xs font-medium text-white/95 shadow drop-shadow-sm group-hover/btn:bg-black/60 transition">
+                                        点击在新窗口播放 {{ icon('link', 'w-3 h-3') }}
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                        <div id="videoStrip" class="hidden mt-3 overflow-x-auto custom-scroll scroll-smooth snap-x snap-mandatory pb-2">
+                            <div id="videoTrack" class="flex min-w-max gap-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- 背景音频播放栏 -->
+                    <div id="audioContainer" class="hidden scroll-mt-24">
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2 flex items-center gap-2">{{ icon('music', 'w-4 h-4 text-slate-500') }} 背景音频</h4>
+                        <audio id="audioPlayer" controls referrerpolicy="no-referrer" class="w-full rounded-xl"></audio>
+                        <p id="audioPreviewNotice" class="hidden mt-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-3.5 py-2.5 text-xs leading-relaxed text-slate-600"></p>
+                    </div>
+
+                    <!-- 平台字幕或歌词 -->
+                    <div id="subtitleContainer" class="hidden scroll-mt-24">
+                        <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                            <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">{{ icon('scroll', 'w-4 h-4 text-slate-500') }} 字幕/歌词 (<span id="subtitleCount">0</span>)</h4>
+                        </div>
+                        <div id="subtitleList" class="max-h-72 space-y-2 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50 p-3 custom-scroll"></div>
+                    </div>
+
+                    <!-- 高清图集网格 -->
+                    <div id="imageContainer" class="hidden scroll-mt-24">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                            <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">{{ icon('image', 'w-4 h-4 text-slate-500') }} 高清图集/封面 (<span id="imageCount">0</span>)</h4>
+                        </div>
+                        <div id="imageGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5"></div>
+                    </div>
+
+                    <!-- 无可用多媒体提示 -->
+                    <div id="emptyMediaNotice" class="hidden py-8 text-center text-slate-400 text-sm">未解析到可直观预览的多媒体资源</div>
+                </div>
+
+                <!-- JSON 结构视角 -->
+                <div id="viewJson" class="hidden p-5 sm:p-7">
+                    <pre class="rounded-2xl border border-slate-800 bg-slate-950 p-5 font-mono text-xs text-slate-200 overflow-x-auto max-h-[480px] custom-scroll leading-relaxed"><code id="jsonCode"></code></pre>
+                </div>
+            </div>
+        </div></section>
+
+        <!-- 图片大图预览 Modal (Lightbox) -->
+        <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm p-4 flex flex-col items-center justify-center transition-all" onclick="closeLightbox()">
+            <button onclick="closeLightbox()" class="absolute top-5 right-5 text-white/80 hover:text-white text-2xl font-bold bg-white/10 w-10 h-10 rounded-full flex items-center justify-center transition">&times;</button>
+            <img id="lightboxImg" src="" alt="" referrerpolicy="no-referrer" class="max-w-full max-h-[80vh] rounded-xl object-contain shadow-2xl" onclick="event.stopPropagation()">
+            <div class="mt-4 flex flex-wrap items-center justify-center gap-3" onclick="event.stopPropagation()">
+                <button id="lightboxCopyBtn" onclick="copyLightboxUrl()" class="rounded-xl bg-white/20 hover:bg-white/30 text-white px-4 py-2 text-xs font-semibold backdrop-blur-md transition inline-flex items-center gap-1.5">{{ icon('clipboard', 'w-3.5 h-3.5') }}复制图片链接</button>
+                <a id="lightboxOpenLink" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" class="rounded-xl bg-white/20 hover:bg-white/30 text-white px-4 py-2 text-xs font-semibold backdrop-blur-md transition inline-flex items-center gap-1.5">打开图片 ↗</a>
+                <button id="lightboxCopyLiveBtn" onclick="copyLightboxLiveUrl()" class="hidden rounded-xl bg-indigo-600/80 hover:bg-indigo-600 text-white px-4 py-2 text-xs font-semibold backdrop-blur-md transition inline-flex items-center gap-1.5">{{ icon('clipboard', 'w-3.5 h-3.5') }}复制实况视频</button>
+                <a id="lightboxOpenLiveLink" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" class="hidden rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-semibold shadow-md transition">打开实况 ↗</a>
+            </div>
+        </div>
+
+        <section id="capabilities" class="max-w-7xl mx-auto px-5 sm:px-8 py-20"><div class="grid lg:grid-cols-[.7fr_1.3fr] gap-12 items-start"><div class="lg:sticky lg:top-28"><p class="font-mono text-sm font-semibold text-brand">ONE ENDPOINT</p><h2 class="mt-3 text-3xl sm:text-4xl font-bold text-slate-950">面向真实业务的解析能力</h2><p class="mt-4 text-slate-600 leading-7">解析器按平台独立维护，对外保持一致的数据结构。后台可随时关闭异常平台，不影响其他接口。</p></div><div class="grid sm:grid-cols-2 gap-4">
+            {% for number,title,description in [('01','多类型媒体','统一获取视频、图集、Live Photo、背景音频、封面及字幕。'),('02','密钥与限流','每位客户独立管理 API Key，支持用户级、密钥级和平台级 QPS。'),('03','状态可控制','管理员可控制全局服务和单个平台，并配置客户有效期。'),('04','调用可追踪','记录平台、响应状态、错误码和耗时，快速定位解析异常。')] %}<article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="text-brand font-mono font-semibold">{{ number }}</div><h3 class="mt-8 text-xl font-bold text-slate-950">{{ title }}</h3><p class="mt-3 text-slate-600 leading-7">{{ description }}</p></article>{% endfor %}
+        </section>
+
+        <!-- 开源使用与部署方式 -->
+        <section id="deployment" class="border-t border-slate-200 bg-white">
+            <div class="max-w-7xl mx-auto px-5 sm:px-8 py-20">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <p class="font-mono text-sm font-semibold text-brand">OPEN SOURCE & DEPLOYMENT</p>
+                    <h2 class="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-slate-950">完全开源自建，按需灵活落地</h2>
+                    <p class="mt-4 text-slate-600 text-base leading-7">基于宽松的 MIT 协议开放，零商业授权门槛。解析引擎、业务数据与运行基础设施由部署者全权自主掌控。</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 items-stretch">
+                    <!-- 个人与轻量自用 -->
+                    <div class="rounded-3xl border border-slate-200 bg-white p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition">
+                        <div>
+                            <div class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">MIT LICENSE</div>
+                            <h3 class="mt-4 text-xl font-bold text-slate-950">个人与轻量自用</h3>
+                            <p class="mt-2 text-sm text-slate-500">适用于学习研究、个人工具开发与轻量级自动化集成</p>
+                            <div class="mt-6 flex items-baseline gap-1">
+                                <span class="text-4xl font-black text-slate-950">¥0</span>
+                                <span class="text-sm font-medium text-slate-500">/ 永久开源</span>
+                            </div>
+                            <div class="my-6 border-t border-slate-100"></div>
+                            <ul class="space-y-3.5 text-sm text-slate-600">
+                                <li class="flex items-center gap-3"><svg class="w-4 h-4 text-emerald-500 shrink-0 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg><span>完整开放源码与标准 JSON 规范</span></li>
+                                <li class="flex items-center gap-3"><svg class="w-4 h-4 text-emerald-500 shrink-0 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg><span>Docker Compose 单机快速启动</span></li>
+                                <li class="flex items-center gap-3"><svg class="w-4 h-4 text-emerald-500 shrink-0 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg><span>透明无暗桩，通过 GitHub 社区交流</span></li>
+                            </ul>
+                        </div>
+                        <a href="https://github.com/ucmao/media-parser" target="_blank" rel="noopener noreferrer" class="mt-8 w-full block text-center rounded-xl border border-slate-300 bg-white py-3 px-4 font-bold text-slate-800 hover:border-brand hover:text-brand transition">查看源码与部署文档</a>
+                    </div>
+
+                    <!-- 团队与私有中台 -->
+                    <div class="relative rounded-3xl border-2 border-brand bg-white p-8 flex flex-col justify-between shadow-xl ring-1 ring-brand/10">
+                        <div>
+                            <div class="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-brand">SELF-HOSTED GATEWAY</div>
+                            <h3 class="mt-4 text-xl font-bold text-slate-950">团队私有网关</h3>
+                            <p class="mt-2 text-sm text-slate-500">适合将解析能力部署为团队或业务系统的统一内部服务</p>
+                            <div class="mt-6 flex items-baseline gap-1">
+                                <span class="text-4xl font-black text-brand">开箱即用</span>
+                                <span class="text-sm font-medium text-slate-500">/ 内置中台管控</span>
+                            </div>
+                            <div class="my-6 border-t border-slate-100"></div>
+                            <ul class="space-y-3.5 text-sm text-slate-600">
+                                <li class="flex items-center gap-3"><svg class="w-4 h-4 text-brand shrink-0 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg><span>租户、API Key、有效期与积分体系</span></li>
+                                <li class="flex items-center gap-3"><svg class="w-4 h-4 text-brand shrink-0 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg><span>用户 / 密钥 / 平台三级精细化流控</span></li>
+                                <li class="flex items-center gap-3"><svg class="w-4 h-4 text-brand shrink-0 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg><span>平台熔断开关、调用日志与用量统计</span></li>
+                            </ul>
+                        </div>
+                        <a href="#docs" class="mt-8 w-full block text-center rounded-xl bg-brand py-3 px-4 font-bold text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">查看 API 接入方式</a>
+                    </div>
+
+                    <!-- 私有自治与合规 -->
+                    <div class="rounded-3xl border border-slate-200 bg-white p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition">
+                        <div>
+                            <div class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">DATA PRIVACY & COMPLIANCE</div>
+                            <h3 class="mt-4 text-xl font-bold text-slate-950">私有自治与合规</h3>
+                            <p class="mt-2 text-sm text-slate-500">私有网络独立运行，数据不过第三方，保障业务稳定与合规</p>
+                            <div class="mt-6 flex items-baseline gap-1">
+                                <span class="text-4xl font-black text-slate-950">自主掌控</span>
+                                <span class="text-sm font-medium text-slate-500">/ 本地私有运行</span>
+                            </div>
+                            <div class="my-6 border-t border-slate-100"></div>
+                            <ul class="space-y-3.5 text-sm text-slate-600">
+                                <li class="flex items-center gap-3"><svg class="w-4 h-4 text-emerald-500 shrink-0 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg><span>私网独立部署，无第三方调用与数据泄露风险</span></li>
+                                <li class="flex items-center gap-3"><svg class="w-4 h-4 text-emerald-500 shrink-0 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg><span>目标平台 Cookie 与密钥凭据完全本地化自管</span></li>
+                                <li class="flex items-center gap-3"><svg class="w-4 h-4 text-emerald-500 shrink-0 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg><span>自主把握频次，严格遵守目标平台使用规则</span></li>
+                            </ul>
+                        </div>
+                        <a href="https://github.com/ucmao/media-parser#%EF%B8%8F-%E5%BC%80%E6%BA%90%E5%8D%8F%E8%AE%AE--%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E" target="_blank" rel="noopener noreferrer" class="mt-8 w-full block text-center rounded-xl border border-slate-300 bg-white py-3 px-4 font-bold text-slate-800 hover:border-slate-400 transition">查看开源协议与合规须知</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="docs" class="border-t border-slate-200 bg-slate-50"><div class="max-w-7xl mx-auto px-5 sm:px-8 py-20 grid lg:grid-cols-2 gap-12 items-center"><div><p class="font-mono text-sm font-semibold text-brand">QUICK START</p><h2 class="mt-3 text-3xl sm:text-4xl font-bold text-slate-950">GET 接口，小白也能用</h2><p class="mt-4 text-slate-600 leading-7">注册并由管理员开通有效期后，在控制台创建 API Key。推荐使用请求头传递密钥，也兼容直接放入查询参数。</p><div class="mt-7 flex gap-3"><a href="{{ url_for('auth.register') }}" class="rounded-xl bg-brand px-5 py-3 font-bold text-white">注册账号</a><a href="{{ url_for('auth.login') }}" class="rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-800">进入控制台</a></div></div><div class="rounded-2xl border border-slate-200 bg-white p-6 font-mono text-sm leading-7 overflow-x-auto custom-scroll shadow-sm"><p class="text-slate-500"># 最简单的 URL 调用方式</p><p class="mt-2 whitespace-nowrap"><span class="text-sky-700">GET</span> /api/v1/parse?<span class="text-brand">key</span>=mp-xxx&amp;<span class="text-brand">url</span>=分享链接</p><div class="my-5 border-t border-slate-200"></div><p class="text-slate-500"># 推荐：密钥放在请求头</p><p class="mt-2 text-emerald-700">Authorization: Bearer mp-xxx</p></div></div></section>
+
+        <!-- 常见问题 FAQ 板块 -->
+        <section id="faq" class="border-t border-slate-200 bg-white">
+            <div class="max-w-5xl mx-auto px-5 sm:px-8 py-20">
+                <div class="text-center max-w-2xl mx-auto mb-14">
+                    <p class="font-mono text-sm font-semibold text-brand">FREQUENTLY ASKED QUESTIONS</p>
+                    <h2 class="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-slate-950">常见问题解答</h2>
+                    <p class="mt-3 text-slate-600 leading-7">解答你在对接与使用 Media Parser API 过程中的常见疑问。</p>
+                </div>
+
+                <div class="space-y-4">
+                    <details class="group rounded-2xl border border-slate-200 bg-slate-50/50 p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-200 hover:border-indigo-200 hover:bg-white" open>
+                        <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-lg">
+                            <span>解析出来的视频和图集是高清无水印的吗？</span>
+                            <span class="ml-4 shrink-0 rounded-full bg-slate-100 p-1.5 text-slate-500 group-open:-rotate-180 group-open:bg-indigo-50 group-open:text-brand transition-all duration-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-7 text-sm sm:text-base border-t border-slate-100 pt-4">
+                            Media Parser 会尽量返回目标平台当前可获取的原始媒体地址，不主动对资源进行二次压缩。实际清晰度和水印情况取决于作品、平台接口、登录状态及平台后续调整，无法对所有链接作统一保证。
+                        </p>
+                    </details>
+
+                    <details class="group rounded-2xl border border-slate-200 bg-slate-50/50 p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-200 hover:border-indigo-200 hover:bg-white">
+                        <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-lg">
+                            <span>提取出的音视频/图片直链会过期或遭遇防盗链吗？</span>
+                            <span class="ml-4 shrink-0 rounded-full bg-slate-100 p-1.5 text-slate-500 group-open:-rotate-180 group-open:bg-indigo-50 group-open:text-brand transition-all duration-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-7 text-sm sm:text-base border-t border-slate-100 pt-4">
+                            可能会。媒体地址通常由目标平台的 CDN 提供，可能包含时效签名、登录校验或防盗链策略，具体有效期由平台决定。对于拥有合法保存权且需要持久化的内容，请在解析后及时转存到自己的存储服务。
+                        </p>
+                    </details>
+
+                    <details class="group rounded-2xl border border-slate-200 bg-slate-50/50 p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-200 hover:border-indigo-200 hover:bg-white">
+                        <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-lg">
+                            <span>遇到目标平台改版导致解析失败怎么办？</span>
+                            <span class="ml-4 shrink-0 rounded-full bg-slate-100 p-1.5 text-slate-500 group-open:-rotate-180 group-open:bg-indigo-50 group-open:text-brand transition-all duration-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-7 text-sm sm:text-base border-t border-slate-100 pt-4">
+                            请先更新到项目最新版本，并检查该平台是否需要 Cookie 等额外配置。如果问题仍然存在，可携带脱敏后的示例链接和错误日志提交 GitHub Issue。开源自部署实例不会自动热更新，升级前请先在自己的环境中验证。
+                        </p>
+                    </details>
+
+                    <details class="group rounded-2xl border border-slate-200 bg-slate-50/50 p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-200 hover:border-indigo-200 hover:bg-white">
+                        <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-lg">
+                            <span>如何获取和配置 API Key？</span>
+                            <span class="ml-4 shrink-0 rounded-full bg-slate-100 p-1.5 text-slate-500 group-open:-rotate-180 group-open:bg-indigo-50 group-open:text-brand transition-all duration-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-7 text-sm sm:text-base border-t border-slate-100 pt-4">
+                            自部署后，首次访问 <code class="font-mono text-sm">/auth/setup</code> 创建管理员。用户登录控制台后可以创建和管理自己的 API Key；调用接口时推荐使用 <code class="font-mono text-sm">Authorization: Bearer mp-xxx</code>，也兼容 <code class="font-mono text-sm">?key=mp-xxx</code> 查询参数。
+                        </p>
+                    </details>
+
+                    <details class="group rounded-2xl border border-slate-200 bg-slate-50/50 p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-200 hover:border-indigo-200 hover:bg-white">
+                        <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-lg">
+                            <span>QPS、有效期和解析积分如何配置？</span>
+                            <span class="ml-4 shrink-0 rounded-full bg-slate-100 p-1.5 text-slate-500 group-open:-rotate-180 group-open:bg-indigo-50 group-open:text-brand transition-all duration-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-7 text-sm sm:text-base border-t border-slate-100 pt-4">
+                            这些限制均由自部署实例的管理员配置，并非固定商业套餐。默认新用户试用期为 7 天、初始积分为 100、账号限制为 2 QPS；管理员可在后台调整。触发 QPS 限制时返回 429，积分耗尽时返回 402，账号未开通或过期时返回 403。
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- 浮动气泡提示容器 (Landing Toast Notification) -->
+    <div id="landingToastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center gap-2.5 pointer-events-none w-auto max-w-[90vw]"></div>
+
+    <footer class="border-t border-slate-200 bg-white">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8 py-8 flex flex-col sm:flex-row gap-4 justify-between items-center text-sm text-slate-500">
+            <div class="flex items-center gap-3">
+                <img src="{{ url_for('static', filename='images/logo-web.png') }}" alt="" class="w-7 h-7 rounded-lg border border-slate-200 bg-white p-1">
+                <span>Media Parser API · 多平台媒体解析服务</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <span class="inline-flex items-center gap-2 text-slate-500 select-none">
+                    <span class="w-2 h-2 rounded-full {{ 'bg-emerald-500' if api_enabled else 'bg-amber-500' }}"></span>
+                    <span>{{ '系统正常运行' if api_enabled else '系统维护中' }}</span>
+                </span>
+                <a class="hover:text-brand transition" href="https://github.com/ucmao/media-parser" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+        const input=document.getElementById('parseUrl');
+        let lastParsedData = null;
+        let activeLightboxUrl = '';
+        let currentVideoUrls = [];
+        let currentCoverUrl = '';
+        let activeVideoIndex = 0;
+        const iconMarkup = (name, className) => `<svg class="${className}" aria-hidden="true"><use href="{{ url_for('static', filename='icons.svg') }}#icon-${name}"></use></svg>`;
+
+        function showToast(message, type = 'success', duration = 3000) {
+            const container = document.getElementById('landingToastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            const isError = type === 'error';
+            const isWarning = type === 'warning';
+            const iconColor = isError ? 'text-red-500' : isWarning ? 'text-amber-500' : 'text-emerald-500';
+            const icon = isError ? iconMarkup('circle-x', `w-4 h-4 shrink-0 ${iconColor}`) : isWarning ? iconMarkup('alert', `w-4 h-4 shrink-0 ${iconColor}`) : iconMarkup('check', `w-4 h-4 shrink-0 ${iconColor}`);
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-slate-200/80 bg-white/95 backdrop-blur-md shadow-lg shadow-slate-900/5 text-xs sm:text-sm font-medium text-slate-800 transition-all duration-300 transform -translate-y-2 opacity-0`;
+            toast.innerHTML = `${icon}<span>${message}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('-translate-y-2', 'opacity-0');
+            });
+            setTimeout(() => {
+                toast.classList.add('-translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        function clearParser(){
+            input.value = '';
+            document.getElementById('errorState').classList.add('hidden');
+            input.focus();
+        }
+
+        function fillSampleUrl(){
+            input.value = 'https://www.bilibili.com/video/BV1xx411c7mD';
+            document.getElementById('errorState').classList.add('hidden');
+            input.focus();
+            showToast('已填入示例链接，可直接点击“开始解析”', 'success', 2500);
+        }
+        async function pasteFromClipboard(){
+            try {
+                input.value = await navigator.clipboard.readText();
+                input.focus();
+                showToast('已从剪贴板粘贴内容', 'success', 2000);
+            } catch {
+                showToast('无法直接读取剪贴板，请使用快捷键 Ctrl+V / ⌘+V 粘贴', 'warning', 3500);
+            }
+        }
+
+        function copyText(text, successMsg){
+            if(!text) return;
+            if(navigator.clipboard && navigator.clipboard.writeText){
+                navigator.clipboard.writeText(text).then(()=>{
+                    showToast(successMsg || '已复制到剪贴板', 'success');
+                }).catch(()=>{
+                    fallbackCopy(text, successMsg);
+                });
+            } else {
+                fallbackCopy(text, successMsg);
+            }
+        }
+
+        function fallbackCopy(text, successMsg){
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                ta.style.top = '0';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                if(ok){
+                    showToast(successMsg || '已复制到剪贴板', 'success');
+                    return;
+                }
+            } catch(e){}
+            showToast('复制失败，请手动选择复制', 'error');
+        }
+
+        function copyCurrentJson(){
+            if(lastParsedData){
+                copyText(JSON.stringify(lastParsedData, null, 2), '已复制完整 API 返回 JSON 数据');
+            }
+        }
+
+        function uniqueMediaUrls(urls){
+            return [...new Set(urls.filter(url => typeof url === 'string' && url.trim()).map(url => url.trim()))];
+        }
+
+        function formatCopyValue(value, fallback = '未获取到'){
+            if(typeof value === 'number' && Number.isFinite(value)) return String(value);
+            if(typeof value !== 'string') return fallback;
+            const normalized = value.replace(/\s+/g, ' ').trim();
+            return normalized || fallback;
+        }
+
+        function formatCopyMultilineValue(value){
+            return typeof value === 'string' ? value.trim() : '';
+        }
+
+        function formatCopyLink(url){
+            const normalized = formatCopyValue(url, '');
+            return normalized ? `[${normalized}]` : '未获取到';
+        }
+
+        function formatCopySubtitle(subtitle){
+            if(!subtitle || typeof subtitle.text !== 'string') return '';
+            const text = formatCopyMultilineValue(subtitle.text);
+            if(!text) return '';
+            const start = Number(subtitle.start);
+            const end = Number(subtitle.end);
+            if(!Number.isFinite(start) || start < 0) return `- ${text}`;
+            const timeRange = Number.isFinite(end) && end >= start
+                ? `${formatSubtitleTime(start)} - ${formatSubtitleTime(end)}`
+                : formatSubtitleTime(start);
+            return `- ${timeRange} ${text}`;
+        }
+
+        function copyFormattedResult(){
+            if(!lastParsedData) return;
+            const author = lastParsedData.author || {};
+            const authorName = author.nickname || author.author_id;
+            const primaryVideoUrl = lastParsedData.video_url
+                || (lastParsedData.video_list || []).find(url => typeof url === 'string' && url.trim());
+            const formattedContent = [
+                `标题：${formatCopyValue(lastParsedData.title)}`,
+                `平台：${formatCopyValue(lastParsedData.platform)}`,
+                `作者：${formatCopyValue(authorName)}`,
+                `封面：${formatCopyLink(lastParsedData.cover_url)}`,
+                `视频：${formatCopyLink(primaryVideoUrl)}`,
+                `音乐：${formatCopyLink(lastParsedData.audio_url)}`,
+            ];
+
+            if(lastParsedData.video_id){
+                formattedContent.push(`作品 ID：${formatCopyValue(lastParsedData.video_id)}`);
+            }
+            const desc = formatCopyMultilineValue(lastParsedData.desc);
+            if(desc && desc !== formatCopyMultilineValue(lastParsedData.title)){
+                formattedContent.push(`正文：${desc}`);
+            }
+            if(author.author_id && author.author_id !== authorName){
+                formattedContent.push(`作者 ID：${formatCopyValue(author.author_id)}`);
+            }
+            if(author.avatar){
+                formattedContent.push(`作者头像：${formatCopyLink(author.avatar)}`);
+            }
+
+            const videoList = uniqueMediaUrls(lastParsedData.video_list || []);
+            if(videoList.length){
+                formattedContent.push('视频列表：');
+                videoList.forEach((url, index) => formattedContent.push(`- 视频 ${index + 1}：${formatCopyLink(url)}`));
+            }
+
+            const imageList = Array.isArray(lastParsedData.image_list) ? lastParsedData.image_list : [];
+            const formattedImages = imageList.flatMap((item, index) => {
+                if(typeof item === 'string' && item.trim()) return [`- 图片 ${index + 1}：${formatCopyLink(item)}`];
+                if(!item || typeof item !== 'object') return [];
+                const entries = [];
+                if(item.url) entries.push(`- 图片 ${index + 1}：${formatCopyLink(item.url)}`);
+                if(item.live_photo_url) entries.push(`- Live Photo ${index + 1}：${formatCopyLink(item.live_photo_url)}`);
+                return entries;
+            });
+            if(formattedImages.length){
+                formattedContent.push('图集：', ...formattedImages);
+            }
+
+            const formattedSubtitles = (Array.isArray(lastParsedData.subtitles) ? lastParsedData.subtitles : [])
+                .map(formatCopySubtitle)
+                .filter(Boolean);
+            if(formattedSubtitles.length){
+                formattedContent.push('字幕/歌词：', ...formattedSubtitles);
+            }
+
+            formattedContent.push('【使用声明】上述内容及素材版权均归原平台及创作者所有。请尊重原创，仅供个人学习、赏析使用，严禁用于任何商业牟利或非法用途。');
+            copyText(formattedContent.join('\n'), '已格式化复制解析结果');
+        }
+
+        function copyCurrentVideoUrl(){
+            const url = currentVideoUrls[activeVideoIndex];
+            if(url) copyText(url, '已复制当前视频链接');
+        }
+
+        function showVideoFallback(selectedUrl){
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoFallbackContainer = document.getElementById('videoFallbackContainer');
+            const videoCoverBg = document.getElementById('videoCoverBg');
+            const videoCoverImg = document.getElementById('videoCoverImg');
+            const videoDefaultPlaceholder = document.getElementById('videoDefaultPlaceholder');
+            const videoFallbackPlayBtn = document.getElementById('videoFallbackPlayBtn');
+
+            videoPlayer.pause();
+            videoPlayer.classList.add('hidden');
+            videoFallbackContainer.classList.remove('hidden');
+
+            if(videoFallbackPlayBtn) videoFallbackPlayBtn.href = selectedUrl;
+
+            if(currentCoverUrl){
+                videoDefaultPlaceholder.classList.add('hidden');
+                videoCoverImg.onload = () => {
+                    videoCoverImg.classList.remove('hidden');
+                    videoCoverBg.classList.remove('hidden');
+                };
+                videoCoverImg.onerror = () => {
+                    videoCoverImg.classList.add('hidden');
+                    videoCoverBg.classList.add('hidden');
+                    videoDefaultPlaceholder.classList.remove('hidden');
+                };
+                videoCoverImg.src = currentCoverUrl;
+                videoCoverBg.src = currentCoverUrl;
+                if(videoCoverImg.complete && videoCoverImg.naturalWidth > 0){
+                    videoCoverImg.classList.remove('hidden');
+                    videoCoverBg.classList.remove('hidden');
+                }
+            } else {
+                videoCoverImg.classList.add('hidden');
+                videoCoverBg.classList.add('hidden');
+                videoDefaultPlaceholder.classList.remove('hidden');
+            }
+        }
+
+        function selectVideo(index, autoplay = false){
+            if(index < 0 || index >= currentVideoUrls.length) return;
+            activeVideoIndex = index;
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoFallbackContainer = document.getElementById('videoFallbackContainer');
+            const videoOpenDirectLink = document.getElementById('videoOpenDirectLink');
+            const selectedUrl = currentVideoUrls[index];
+
+            videoFallbackContainer.classList.add('hidden');
+            videoPlayer.classList.remove('hidden');
+            if(videoOpenDirectLink) videoOpenDirectLink.href = selectedUrl;
+            videoPlayer.onerror = () => {
+                if(currentVideoUrls[activeVideoIndex] !== selectedUrl) return;
+                showVideoFallback(selectedUrl);
+            };
+            videoPlayer.src = selectedUrl;
+            videoPlayer.load();
+
+            document.querySelectorAll('[data-video-index]').forEach((button, buttonIndex) => {
+                const active = buttonIndex === index;
+                button.className = active
+                    ? 'snap-start min-w-[112px] rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3 text-left text-xs font-bold text-brand shadow-sm transition'
+                    : 'snap-start min-w-[112px] rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-xs font-semibold text-slate-600 hover:border-indigo-200 hover:text-brand transition';
+                button.setAttribute('aria-current', active ? 'true' : 'false');
+            });
+            const activeButton = document.querySelector(`[data-video-index="${index}"]`);
+            activeButton?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+            document.getElementById('previousVideoBtn').disabled = index === 0;
+            document.getElementById('nextVideoBtn').disabled = index === currentVideoUrls.length - 1;
+            if(autoplay) videoPlayer.play().catch(() => {});
+        }
+
+        function stepVideo(offset){
+            selectVideo(activeVideoIndex + offset, true);
+        }
+
+        function switchResultTab(tab){
+            const btnVisual = document.getElementById('tabVisual');
+            const btnJson = document.getElementById('tabJson');
+            const viewVisual = document.getElementById('viewVisual');
+            const viewJson = document.getElementById('viewJson');
+            if(tab === 'visual'){
+                btnVisual.className = 'py-2.5 border-b-2 border-brand text-brand font-bold transition';
+                btnJson.className = 'py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-900 transition';
+                viewVisual.classList.remove('hidden');
+                viewJson.classList.add('hidden');
+            } else {
+                btnJson.className = 'py-2.5 border-b-2 border-brand text-brand font-bold transition';
+                btnVisual.className = 'py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-900 transition';
+                viewJson.classList.remove('hidden');
+                viewVisual.classList.add('hidden');
+            }
+        }
+
+        let activeLightboxLivePhotoUrl = '';
+
+        function openLightbox(url, livePhotoUrl = ''){
+            activeLightboxUrl = url;
+            activeLightboxLivePhotoUrl = livePhotoUrl;
+            const modal = document.getElementById('lightboxModal');
+            const img = document.getElementById('lightboxImg');
+            const openLink = document.getElementById('lightboxOpenLink');
+            const copyLiveBtn = document.getElementById('lightboxCopyLiveBtn');
+            const openLiveLink = document.getElementById('lightboxOpenLiveLink');
+            img.src = url;
+            openLink.href = url;
+
+            if(livePhotoUrl){
+                copyLiveBtn.classList.remove('hidden');
+                openLiveLink.href = livePhotoUrl;
+                openLiveLink.classList.remove('hidden');
+            } else {
+                copyLiveBtn.classList.add('hidden');
+                openLiveLink.classList.add('hidden');
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeLightbox(){
+            document.getElementById('lightboxModal').classList.add('hidden');
+            document.getElementById('lightboxImg').src = '';
+        }
+
+        function copyLightboxLiveUrl(){
+            if(activeLightboxLivePhotoUrl){
+                copyText(activeLightboxLivePhotoUrl, '已复制 Live Photo 实况视频直链');
+            }
+        }
+
+        function formatSubtitleTime(seconds){
+            if(!Number.isFinite(seconds) || seconds < 0) return '';
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds - minutes * 60;
+            return `${String(minutes).padStart(2, '0')}:${remainingSeconds.toFixed(3).padStart(6, '0')}`;
+        }
+
+        function normalizeSubtitles(subtitles){
+            if(!Array.isArray(subtitles)) return [];
+            return subtitles.flatMap(subtitle => {
+                if(!subtitle || typeof subtitle.text !== 'string') return [];
+                const text = subtitle.text.trim();
+                const start = Number(subtitle.start);
+                const end = Number(subtitle.end);
+                if(!text) return [];
+                const hasStart = Number.isFinite(start) && start >= 0;
+                return [{
+                    text,
+                    start: hasStart ? start : null,
+                    end: hasStart && Number.isFinite(end) && end >= start ? end : null,
+                }];
+            });
+        }
+
+        function copyLightboxUrl(){
+            if(activeLightboxUrl){
+                copyText(activeLightboxUrl, '已复制大图链接');
+            }
+        }
+
+        function renderResult(data){
+            lastParsedData = data;
+            document.getElementById('resultPlatform').textContent = data.platform || '未知平台';
+            document.getElementById('resultTitle').textContent = data.title || '未获取到标题';
+            const desc = typeof data.desc === 'string' ? data.desc.trim() : '';
+            document.getElementById('resultDescText').textContent = desc;
+            const title = typeof data.title === 'string' ? data.title.trim() : '';
+            document.getElementById('resultDesc').classList.toggle('hidden', !desc || desc === title);
+            const author = data.author && typeof data.author === 'object' ? data.author : {};
+            const authorName = author.nickname || author.author_id || '';
+            document.getElementById('resultAuthor').textContent = authorName;
+            const authorAvatar = document.getElementById('resultAuthorAvatar');
+            const avatarUrl = typeof author.avatar === 'string' ? author.avatar.trim() : '';
+            if(avatarUrl){
+                authorAvatar.alt = authorName ? `${authorName}的头像` : '作者头像';
+                authorAvatar.onerror = () => {
+                    authorAvatar.classList.add('hidden');
+                    authorAvatar.removeAttribute('src');
+                };
+                authorAvatar.src = avatarUrl;
+                authorAvatar.classList.remove('hidden');
+            } else {
+                authorAvatar.onerror = null;
+                authorAvatar.removeAttribute('src');
+                authorAvatar.alt = '';
+                authorAvatar.classList.add('hidden');
+            }
+
+            currentCoverUrl = (typeof data.cover_url === 'string' && data.cover_url.trim())
+                || (typeof data.cover === 'string' && data.cover.trim())
+                || (Array.isArray(data.image_list) && data.image_list.length > 0 && typeof data.image_list[0] === 'string' ? data.image_list[0].trim() : '')
+                || '';
+            currentVideoUrls = uniqueMediaUrls([data.video_url, ...(data.video_list || [])]);
+
+            // 1. 视频渲染
+            const videoContainer = document.getElementById('videoContainer');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoFallbackContainer = document.getElementById('videoFallbackContainer');
+            const videoStrip = document.getElementById('videoStrip');
+            const videoTrack = document.getElementById('videoTrack');
+            const previousVideoBtn = document.getElementById('previousVideoBtn');
+            const nextVideoBtn = document.getElementById('nextVideoBtn');
+            activeVideoIndex = 0;
+            videoTrack.replaceChildren();
+            document.getElementById('videoCount').textContent = currentVideoUrls.length;
+            if(currentVideoUrls.length){
+                currentVideoUrls.forEach((url, index) => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.dataset.videoIndex = index;
+                    button.innerHTML = `<span class="block text-[10px] font-medium text-slate-400">${index + 1} / ${currentVideoUrls.length}</span><span class="mt-1 block">视频 ${index + 1}</span>`;
+                    button.onclick = () => {
+                        selectVideo(index, true);
+                        videoContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    };
+                    videoTrack.appendChild(button);
+                });
+                const hasMultipleVideos = currentVideoUrls.length > 1;
+                videoStrip.classList.toggle('hidden', !hasMultipleVideos);
+                previousVideoBtn.classList.toggle('hidden', !hasMultipleVideos);
+                nextVideoBtn.classList.toggle('hidden', !hasMultipleVideos);
+                selectVideo(0);
+                videoContainer.classList.remove('hidden');
+            } else {
+                videoPlayer.pause();
+                videoPlayer.removeAttribute('src');
+                videoPlayer.load();
+                videoPlayer.classList.remove('hidden');
+                videoFallbackContainer.classList.add('hidden');
+                document.getElementById('videoOpenDirectLink').removeAttribute('href');
+                videoStrip.classList.add('hidden');
+                previousVideoBtn.classList.add('hidden');
+                nextVideoBtn.classList.add('hidden');
+                videoContainer.classList.add('hidden');
+            }
+
+            // 2. 音频渲染
+            const audioContainer = document.getElementById('audioContainer');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const audioNotice = document.getElementById('audioPreviewNotice');
+            if(data.audio_url){
+                audioNotice.classList.add('hidden');
+                audioPlayer.onerror = () => {
+                    audioNotice.textContent = '该音频直链暂时无法在浏览器中预览，可能已过期或被平台的访问策略限制；解析结果仍可在 JSON 中查看或重新获取。';
+                    audioNotice.classList.remove('hidden');
+                };
+                audioPlayer.src = data.audio_url;
+                audioContainer.classList.remove('hidden');
+            } else {
+                audioPlayer.pause();
+                audioPlayer.src = '';
+                audioNotice.classList.add('hidden');
+                audioContainer.classList.add('hidden');
+            }
+
+            // 3. 字幕/歌词渲染
+            const subtitleContainer = document.getElementById('subtitleContainer');
+            const subtitleList = document.getElementById('subtitleList');
+            const subtitles = normalizeSubtitles(data.subtitles);
+            subtitleList.replaceChildren();
+            document.getElementById('subtitleCount').textContent = subtitles.length;
+            if(subtitles.length){
+                subtitles.forEach((subtitle, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-start gap-3 rounded-xl bg-white px-3 py-2.5 text-sm shadow-sm ring-1 ring-slate-200/70';
+
+                    const time = document.createElement('span');
+                    time.className = 'shrink-0 font-mono text-xs leading-5 text-indigo-600';
+                    time.textContent = subtitle.start === null
+                        ? '未标注时间'
+                        : subtitle.end === null
+                            ? formatSubtitleTime(subtitle.start)
+                            : `${formatSubtitleTime(subtitle.start)} - ${formatSubtitleTime(subtitle.end)}`;
+
+                    const text = document.createElement('p');
+                    text.className = 'min-w-0 flex-1 leading-5 text-slate-700 whitespace-pre-wrap break-words';
+                    text.textContent = subtitle.text;
+                    text.setAttribute('aria-label', `第 ${index + 1} 条字幕`);
+
+                    row.append(time, text);
+                    subtitleList.appendChild(row);
+                });
+                subtitleContainer.classList.remove('hidden');
+            } else {
+                subtitleContainer.classList.add('hidden');
+            }
+
+            // 4. 图片网格渲染
+            const imageContainer = document.getElementById('imageContainer');
+            const imageGrid = document.getElementById('imageGrid');
+            const imageCount = document.getElementById('imageCount');
+            imageGrid.replaceChildren();
+
+            const uniqueImageList = [];
+            const seenUrls = new Set();
+
+            (data.image_list || []).forEach((item, idx) => {
+                let url = '';
+                let livePhoto = '';
+                if(typeof item === 'string'){
+                    url = item.trim();
+                } else if(item && typeof item === 'object'){
+                    url = (item.url || '').trim();
+                    livePhoto = (item.live_photo_url || '').trim();
+                }
+                if(url && !seenUrls.has(url)){
+                    seenUrls.add(url);
+                    const isLive = Boolean(livePhoto);
+                    uniqueImageList.push({
+                        label: isLive ? `Live Photo ${idx + 1}` : `图片 ${idx + 1}`,
+                        url: url,
+                        livePhoto: livePhoto
+                    });
+                }
+            });
+
+            const coverUrl = typeof data.cover_url === 'string' ? data.cover_url.trim() : '';
+            if(coverUrl && !seenUrls.has(coverUrl)){
+                seenUrls.add(coverUrl);
+                uniqueImageList.unshift({ label: '封面', url: coverUrl, livePhoto: '' });
+            }
+            if(uniqueImageList.length > 0){
+                imageCount.textContent = uniqueImageList.length;
+                uniqueImageList.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'group relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 aspect-square shadow-sm cursor-pointer';
+
+                    const img = document.createElement('img');
+                    img.src = item.url;
+                    img.referrerPolicy = 'no-referrer';
+                    img.loading = 'lazy';
+                    img.className = 'w-full h-full object-cover transition duration-300 group-hover:scale-105';
+                    img.onclick = () => openLightbox(item.url, item.livePhoto);
+                    card.appendChild(img);
+
+                    let cardVideo = null;
+                    if(item.livePhoto){
+                        cardVideo = document.createElement('video');
+                        cardVideo.src = item.livePhoto;
+                        cardVideo.loop = true;
+                        cardVideo.muted = true;
+                        cardVideo.playsInline = true;
+                        cardVideo.referrerPolicy = 'no-referrer';
+                        cardVideo.className = 'absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 pointer-events-none group-hover:opacity-100';
+                        card.appendChild(cardVideo);
+
+                        card.onmouseenter = () => cardVideo.play().catch(() => {});
+                        card.onmouseleave = () => { cardVideo.pause(); cardVideo.currentTime = 0; };
+                    }
+
+                    const badge = document.createElement('span');
+                    if(item.livePhoto){
+                        badge.className = 'absolute top-2 left-2 rounded-md bg-indigo-600/90 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-md flex items-center gap-1 shadow-sm';
+                        badge.innerHTML = `<svg class="w-3 h-3 fill-current animate-pulse" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="2 2"/></svg>${item.label}`;
+                    } else {
+                        badge.className = 'absolute top-2 left-2 rounded-md bg-slate-900/65 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md';
+                        badge.textContent = item.label;
+                    }
+
+                    const overlay = document.createElement('div');
+                    overlay.className = 'absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition duration-200 flex items-center justify-center gap-2 p-2';
+
+                    const btnZoom = document.createElement('button');
+                    btnZoom.className = 'rounded-xl bg-white/95 px-3 py-1.5 text-xs font-bold text-slate-800 shadow-md hover:bg-white transition flex items-center gap-1.5';
+                    btnZoom.innerHTML = `${iconMarkup('search', 'w-3.5 h-3.5')}放大`;
+                    btnZoom.onclick = (e) => { e.stopPropagation(); openLightbox(item.url, item.livePhoto); };
+
+                    overlay.appendChild(btnZoom);
+
+                    img.onerror = () => {
+                        img.remove();
+                        if(cardVideo) cardVideo.remove();
+                        overlay.remove();
+                        badge.remove();
+                        card.className = 'rounded-2xl border border-slate-200/80 bg-slate-50/80 aspect-square p-4 flex items-center justify-center text-center text-xs leading-5 text-slate-500';
+                        card.textContent = '图片直链已失效或被平台访问策略限制。请重新解析后再试。';
+                    };
+                    card.append(badge, overlay);
+                    imageGrid.appendChild(card);
+                });
+                imageContainer.classList.remove('hidden');
+            } else {
+                imageContainer.classList.add('hidden');
+            }
+
+            // 5. 无资源提示
+            const emptyNotice = document.getElementById('emptyMediaNotice');
+            if(currentVideoUrls.length === 0 && !data.audio_url && uniqueImageList.length === 0){
+                emptyNotice.classList.remove('hidden');
+            } else {
+                emptyNotice.classList.add('hidden');
+            }
+
+            // 6. JSON 数据渲染
+            document.getElementById('jsonCode').textContent = JSON.stringify(data, null, 2);
+
+            // 显示结果区并默认显示视觉预览 Tab
+            switchResultTab('visual');
+            document.getElementById('resultState').classList.remove('hidden');
+        }
+
+        function formatUserErrorMessage(payload) {
+            if (!payload || typeof payload !== 'object') {
+                return {
+                    title: '解析未完成',
+                    message: '未能成功获取媒体信息，请检查链接后重试。',
+                    hint: '建议确认原作品在对应 App 中是否公开可见。',
+                    tag: '未知状态'
+                };
+            }
+            const code = payload.error_code || '';
+            const rawDesc = typeof payload.retdesc === 'string' ? payload.retdesc.trim() : '';
+
+            // 1. 凭据/Cookie 要求（敏感信息脱敏，屏蔽环境变量名与服务端配置）
+            if (code.endsWith('_COOKIE_REQUIRED') || /cookie|凭证|yuanbao_cookie/i.test(rawDesc)) {
+                return {
+                    title: '目标平台在线体验受限',
+                    message: '该平台当前启用了较严格的访问安全策略或需要环境授权，首页在线体验暂无法直接提取。',
+                    hint: '建议尝试解析抖音、B站、快手等平台公开作品体验。',
+                    tag: '平台受限'
+                };
+            }
+
+            // 2. 链接与文本格式
+            if (code === 'INVALID_TEXT' || code === 'URL_NOT_FOUND') {
+                return {
+                    title: '未检测到有效链接',
+                    message: '请粘贴包含完整 HTTP/HTTPS 分享链接的文案后再试。',
+                    hint: '支持直接粘贴客户端复制的完整分享口令（如“7.12 xxx 复制此链接打开…”）。',
+                    tag: '链接格式'
+                };
+            }
+            if (code === 'TEXT_TOO_LONG') {
+                return {
+                    title: '分享内容过长',
+                    message: '粘贴的文本长度超出了单次解析限制（2000 字符以内）。',
+                    hint: '建议仅保留核心分享链接或精简前后的多余文字。',
+                    tag: '超长限制'
+                };
+            }
+            if (code === 'REDIRECT_FAILED') {
+                return {
+                    title: '分享链接无法访问',
+                    message: '无法连通或识别该分享链接，可能是短链已失效或目标平台拒绝了访问。',
+                    hint: '请在手机浏览器或原 App 中确认该链接是否能正常打开。',
+                    tag: '访问失败'
+                };
+            }
+            if (code === 'PLATFORM_NOT_SUPPORTED') {
+                return {
+                    title: '暂未支持该平台',
+                    message: '当前尚未支持提取该平台的内容，平台能力会持续更新完善。',
+                    hint: '支持的平台列表可查阅下方“平台能力”板块。',
+                    tag: '平台支持'
+                };
+            }
+            if (code === 'PLATFORM_DISABLED') {
+                return {
+                    title: '该平台解析暂不可用',
+                    message: '该平台的解析服务目前处于维护或临时下线状态。',
+                    hint: '请尝试体验其他平台的作品，或稍后再试。',
+                    tag: '维护中'
+                };
+            }
+
+            // 3. 作品自身状态（删除/私密/无媒体）
+            if (code === 'MEDIA_DELETED_OR_PRIVATE') {
+                return {
+                    title: '作品不可查看',
+                    message: '该内容可能已被原作者删除，或者属于仅自己/好友可见的私密作品。',
+                    hint: '请确保该作品在对应平台为全网公开可见状态。',
+                    tag: '作品状态'
+                };
+            }
+            if (code === 'NO_MEDIA_IN_CONTENT') {
+                return {
+                    title: '未包含多媒体资源',
+                    message: '该分享内容仅包含纯文字对话，未检测到可提取的视频、音频或图片。',
+                    hint: '请尝试分享包含图片或视频的作品。',
+                    tag: '无多媒体'
+                };
+            }
+
+            // 4. 频率与服务状态
+            if (code === 'RATE_LIMITED') {
+                return {
+                    title: '体验频率受限',
+                    message: '为保障公共演示体验稳定，首页在线体验已达到短时频控上限。',
+                    hint: '请稍候 1 分钟后再试；或注册账号获取专属 API Key 进行调用。',
+                    tag: '频控限制'
+                };
+            }
+            if (code === 'API_DISABLED' || code === 'DEMO_DISABLED') {
+                return {
+                    title: '在线体验维护中',
+                    message: '在线解析体验当前正在系统维护中，暂时无法处理体验请求。',
+                    hint: '请稍后再试或联系系统管理员。',
+                    tag: '服务维护'
+                };
+            }
+            if (code === 'INVALID_REQUEST') {
+                return {
+                    title: '请求格式异常',
+                    message: '体验请求参数异常，请刷新页面后重新输入。',
+                    hint: '建议直接粘贴分享链接重试。',
+                    tag: '参数异常'
+                };
+            }
+            if (code === 'MEDIA_NOT_FOUND' || code === 'INTERNAL_ERROR') {
+                return {
+                    title: '提取媒体内容失败',
+                    message: '暂时未能成功提取到媒体直链，可能是目标平台临时风控或网络波动。',
+                    hint: '建议稍后重试，或尝试其他平台/作者的公开作品。',
+                    tag: '提取失败'
+                };
+            }
+
+            // 5. 兜底敏感词与技术黑话过滤
+            if (/cookie|json|sql|traceback|500|exception|bearer|token|auth/i.test(rawDesc)) {
+                return {
+                    title: '解析暂时遇到问题',
+                    message: '未能成功获取媒体信息，请检查链接后重试。',
+                    hint: '建议确认原作品在对应 App 中是否公开可见。',
+                    tag: '解析异常'
+                };
+            }
+
+            return {
+                title: '解析未完成',
+                message: rawDesc || '未能成功获取媒体信息，请检查链接后重试。',
+                hint: '建议确认原作品在对应 App 中是否公开可见。',
+                tag: '提示'
+            };
+        }
+
+        function displayError(info) {
+            const error = document.getElementById('errorState');
+            const errorTitle = document.getElementById('errorTitle');
+            const errorMsg = document.getElementById('errorMsg');
+            const errorHint = document.getElementById('errorHint');
+            const errorTag = document.getElementById('errorTag');
+
+            if (errorTitle) errorTitle.textContent = info.title || '解析失败';
+            if (errorMsg) errorMsg.textContent = info.message || '请检查链接后重试';
+            if (errorHint) errorHint.textContent = info.hint || '建议确认原作品在对应 App 中是否公开可见。';
+            if (errorTag) {
+                if (info.tag) {
+                    errorTag.textContent = info.tag;
+                    errorTag.classList.remove('hidden');
+                } else {
+                    errorTag.classList.add('hidden');
+                }
+            }
+            error.classList.remove('hidden');
+            error.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        async function handleParse(){
+            const text = input.value.trim();
+            const button = document.getElementById('parseBtn');
+            const loading = document.getElementById('loadingState');
+            const error = document.getElementById('errorState');
+            const result = document.getElementById('resultState');
+
+            if (!text || button.disabled) {
+                if (!text) {
+                    displayError(formatUserErrorMessage({ error_code: 'INVALID_TEXT' }));
+                    input.focus();
+                }
+                return;
+            }
+
+            button.disabled = true;
+            loading.classList.remove('hidden');
+            error.classList.add('hidden');
+            result.classList.add('hidden');
+            const hpWebsite = document.getElementById('hpWebsite')?.value || '';
+
+            try {
+                const response = await fetch('/api/parse', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, website: hpWebsite })
+                });
+                const payload = await response.json();
+                if (response.ok && payload.succ) {
+                    renderResult(payload.data);
+                    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    displayError(formatUserErrorMessage(payload));
+                }
+            } catch {
+                displayError({
+                    title: '网络连接异常',
+                    message: '无法连接到解析服务，请检查网络后重试。',
+                    hint: '建议检查网络状况或刷新页面后再试。',
+                    tag: '网络异常'
+                });
+            } finally {
+                loading.classList.add('hidden');
+                let countdown = 3;
+                const originalText = '开始解析';
+                button.textContent = `请稍候 (${countdown}s)`;
+                const timer = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        button.textContent = `请稍候 (${countdown}s)`;
+                    } else {
+                        clearInterval(timer);
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                }, 1000);
+            }
+        }
+        input.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key==='Enter')handleParse()});
+        fetch('https://api.github.com/repos/ucmao/media-parser',{headers:{Accept:'application/vnd.github+json'}}).then(res=>res.ok?res.json():Promise.reject()).then(repo=>{if(repo&&repo.stargazers_count!==undefined){const countStr=new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(repo.stargazers_count);const el=document.getElementById('githubStars'),badge=document.getElementById('starCountBadge');if(el)el.textContent=countStr;if(badge){badge.classList.remove('hidden');badge.classList.add('inline-flex')}const navEl=document.getElementById('navGithubStars'),navBadge=document.getElementById('navStarBadge');if(navEl)navEl.textContent=countStr;if(navBadge){navBadge.classList.remove('hidden');navBadge.classList.add('inline-flex')}}}).catch(()=>{});
+    </script>
+</body>
+</html>

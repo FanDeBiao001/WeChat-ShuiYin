@@ -1,0 +1,148 @@
+{% extends 'base_console.html' %}
+{% from 'components/pagination.html' import render_pagination %}
+{% block title %}运行日志 · 管理员后台{% endblock %}
+{% block page_title %}运行日志{% endblock %}
+{% block console_content %}
+<main class="max-w-7xl mx-auto space-y-6">
+    <div id="logs" class="tab-view space-y-6">
+        <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-base font-bold text-slate-900">运行日志</h2>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">{{ logs_table.pagination.total_count }} 条记录</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">记录用户请求的完整链接，支持按关键词、平台、状态及日期范围实时筛选与排序。</p>
+                </div>
+            </div>
+
+            <!-- 筛选与搜索工具栏 -->
+            <form method="get" action="{{ url_for('admin.logs') }}" class="table-toolbar table-filter-form mb-5">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <input type="text" name="logs_q" placeholder="搜索请求URL/客户/错误码..." value="{{ logs_table.query_params.q }}" class="filter-input-text px-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition w-56 bg-white">
+                    <select name="logs_platform" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition bg-white text-slate-700">
+                        <option value="">全部平台</option>
+                        {% for item in platforms %}
+                        <option value="{{ item.name }}" {{ 'selected' if request.args.get('logs_platform') == item.name }}>{{ item.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="logs_status" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition bg-white text-slate-700">
+                        <option value="">全部状态</option>
+                        <option value="200" {{ 'selected' if request.args.get('logs_status') == '200' }}>成功 (&lt;400)</option>
+                        <option value="error" {{ 'selected' if request.args.get('logs_status') == 'error' }}>失败 (&gt;=400)</option>
+                    </select>
+                    <div class="date-range-group">
+                        <input type="date" name="logs_start_date" value="{{ request.args.get('logs_start_date', '') }}" title="开始日期" class="w-28" onchange="this.form.submit()">
+                        <span class="text-slate-300 text-xs select-none">-</span>
+                        <input type="date" name="logs_end_date" value="{{ request.args.get('logs_end_date', '') }}" title="结束日期" class="w-28" onchange="this.form.submit()">
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-small px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition shadow-xs" onclick="resetTableFilter('logs')">重置</button>
+                </div>
+            </form>
+
+            <div class="table-wrap overflow-x-auto rounded-xl border border-slate-200">
+                <table id="logs-table" class="w-full min-w-[960px] text-left text-xs border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
+                        <tr>
+                            <th class="w-11 px-3 py-3 text-center">
+                                <div class="batch-select-dropdown relative inline-flex items-center justify-center" data-table="logs-table" data-total="{{ logs_table.pagination.total_count }}">
+                                    <input type="checkbox" class="table-select-all rounded border-slate-300 text-brand focus:ring-brand/20 cursor-pointer" data-table="logs-table" title="全选当前页">
+                                    <button type="button" class="batch-dropdown-trigger absolute left-full top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-700 ml-0.5" title="选择范围" aria-label="选择范围">
+                                        <svg class="batch-chevron-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                    <div class="batch-dropdown-menu absolute left-0 top-full mt-1.5 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-30 hidden min-w-[105px] text-xs whitespace-nowrap">
+                                        <button type="button" class="batch-dropdown-item w-full text-left px-3 py-1.5 hover:bg-slate-50 text-slate-700" data-action="current-page">选择当前页</button>
+                                        <button type="button" class="batch-dropdown-item w-full text-left px-3 py-1.5 hover:bg-slate-50 text-slate-700" data-action="all">选择全部</button>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="th-sortable px-3 py-3 cursor-pointer select-none hover:text-slate-900 transition whitespace-nowrap w-36" onclick="handleSort('logs', 'created_at')">
+                                时间 <span class="sort-icon ml-0.5 {{ 'text-brand font-bold' if logs_table.sorting.sort_by=='created_at' else 'text-slate-300' }}">{{ '↑' if logs_table.sorting.sort_by=='created_at' and logs_table.sorting.order=='asc' else ('↓' if logs_table.sorting.sort_by=='created_at' else '↕') }}</span>
+                            </th>
+                            <th class="th-sortable px-3 py-3 cursor-pointer select-none hover:text-slate-900 transition whitespace-nowrap w-28" onclick="handleSort('logs', 'username')">
+                                客户 <span class="sort-icon ml-0.5 {{ 'text-brand font-bold' if logs_table.sorting.sort_by=='username' else 'text-slate-300' }}">{{ '↑' if logs_table.sorting.sort_by=='username' and logs_table.sorting.order=='asc' else ('↓' if logs_table.sorting.sort_by=='username' else '↕') }}</span>
+                            </th>
+                            <th class="px-3 py-3 whitespace-nowrap w-28">调用 Key</th>
+                            <th class="th-sortable px-3 py-3 cursor-pointer select-none hover:text-slate-900 transition whitespace-nowrap w-20" onclick="handleSort('logs', 'platform')">
+                                平台 <span class="sort-icon ml-0.5 {{ 'text-brand font-bold' if logs_table.sorting.sort_by=='platform' else 'text-slate-300' }}">{{ '↑' if logs_table.sorting.sort_by=='platform' and logs_table.sorting.order=='asc' else ('↓' if logs_table.sorting.sort_by=='platform' else '↕') }}</span>
+                            </th>
+                            <th class="px-3 py-3 min-w-[220px]">请求 URL</th>
+                            <th class="th-sortable px-3 py-3 cursor-pointer select-none hover:text-slate-900 transition whitespace-nowrap w-20 text-center" onclick="handleSort('logs', 'status_code')">
+                                状态 <span class="sort-icon ml-0.5 {{ 'text-brand font-bold' if logs_table.sorting.sort_by=='status_code' else 'text-slate-300' }}">{{ '↑' if logs_table.sorting.sort_by=='status_code' and logs_table.sorting.order=='asc' else ('↓' if logs_table.sorting.sort_by=='status_code' else '↕') }}</span>
+                            </th>
+                            <th class="px-3 py-3 whitespace-nowrap w-28">错误码</th>
+                            <th class="th-sortable px-3 py-3 cursor-pointer select-none hover:text-slate-900 transition whitespace-nowrap w-24 text-right" onclick="handleSort('logs', 'duration_ms')">
+                                耗时 <span class="sort-icon ml-0.5 {{ 'text-brand font-bold' if logs_table.sorting.sort_by=='duration_ms' else 'text-slate-300' }}">{{ '↑' if logs_table.sorting.sort_by=='duration_ms' and logs_table.sorting.order=='asc' else ('↓' if logs_table.sorting.sort_by=='duration_ms' else '↕') }}</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for log in logs %}
+                        <tr class="hover:bg-slate-50/70 transition">
+                            <td class="px-3 py-3 text-center">
+                                <input type="checkbox" class="row-checkbox rounded border-slate-300 text-brand focus:ring-brand/20 cursor-pointer" value="{{ log['id'] }}">
+                            </td>
+                            <td class="px-3 py-3 whitespace-nowrap text-slate-500">{{ format_log_time(log['created_at']) }}</td>
+                            <td class="px-3 py-3 whitespace-nowrap">
+                                {% if log['username'] %}
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-slate-400 font-mono text-[11px]">#{{ log['user_id'] }}</span>
+                                    <strong class="text-slate-900 font-bold">{{ log['username'] }}</strong>
+                                </div>
+                                {% else %}
+                                <span class="text-slate-400">在线体验</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-3 whitespace-nowrap">
+                                {% if log['key'] %}
+                                <span class="font-mono text-[11px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200" title="{{ log['key'][:11] }}••••••••">{{ log['key'][:11] }}...</span>
+                                {% else %}
+                                <span class="text-slate-400 text-[11px]">Web 免鉴权</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-3 whitespace-nowrap font-medium text-slate-700">{{ log['platform'] or '-' }}</td>
+                            <td class="px-3 py-3 max-w-sm truncate">
+                                {% if log['input_url'] %}
+                                <a href="{{ log['input_url'] }}" target="_blank" rel="noopener noreferrer" class="text-brand hover:underline font-mono text-[11px]" title="{{ log['input_url'] }}">{{ log['input_url'] }}</a>
+                                {% else %}-{% endif %}
+                            </td>
+                            <td class="px-3 py-3 whitespace-nowrap text-center">
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ 'bg-emerald-50 text-emerald-700 border border-emerald-200' if log['status_code']<400 else 'bg-red-50 text-red-700 border border-red-200' }}">{{ log['status_code'] }}</span>
+                            </td>
+                            <td class="px-3 py-3 whitespace-nowrap">
+                                {% if log['error_code'] %}
+                                <code class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[11px] font-mono border border-slate-200">{{ log['error_code'] }}</code>
+                                {% else %}<span class="text-slate-300">-</span>{% endif %}
+                            </td>
+                            <td class="px-3 py-3 whitespace-nowrap text-right font-mono text-slate-600">{{ log['duration_ms'] }} ms</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-10 text-slate-400">暂无符合条件的日志记录</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 分页控件与每页条数 Selector -->
+            {{ render_pagination(logs_table, 'logs', '条数据') }}
+
+            <!-- 底部悬浮胶囊批量工具栏 -->
+            <div id="logs-table-floating-toolbar" class="batch-floating-toolbar fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-md text-slate-800 px-4 py-2.5 rounded-2xl shadow-xl border border-slate-200/90 flex items-center gap-2.5 z-40 text-xs font-semibold transition-all duration-200 opacity-0 pointer-events-none translate-y-4">
+                <div class="batch-toolbar-summary flex items-center gap-1.5 text-slate-600">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span>已选 <strong class="logs-table-selected-count text-slate-900 font-bold">0</strong> 条日志</span>
+                </div>
+                <div class="w-px h-4 bg-slate-200"></div>
+                <button type="button" class="batch-btn batch-btn-primary px-3 py-1.5 rounded-lg bg-brand hover:bg-indigo-700 text-white shadow-xs transition font-semibold" onclick="triggerLogExport('selected')">批量导出 CSV</button>
+                <button type="button" class="batch-btn px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-xs transition font-semibold" onclick="executeBatchAction('logs-table', '/admin/logs/batch', 'delete', {}, '确定要删除选中的日志记录吗？此操作无法恢复。', '删除日志确认', 'danger')">批量删除</button>
+                <div class="w-px h-4 bg-slate-200"></div>
+                <button type="button" class="batch-btn batch-btn-clear px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition font-medium" onclick="clearTableSelection('logs-table')" title="取消选择">&times; 清空</button>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}
