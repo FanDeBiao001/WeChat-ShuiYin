@@ -59,6 +59,12 @@ CREATE TABLE IF NOT EXISTS rate_limit_buckets (
 CREATE INDEX IF NOT EXISTS idx_logs_created_at ON request_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_logs_user_id ON request_logs(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_rate_limit_bucket_time ON rate_limit_buckets(bucket_second);
+CREATE TABLE IF NOT EXISTS miniapp_sessions (
+    token_hash TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    expires_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_miniapp_session_expiry ON miniapp_sessions(expires_at);
 """
 
 

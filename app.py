@@ -12,6 +12,8 @@ from src.web.admin import bp as admin_bp
 from src.db import init_app as init_database
 from src.utils.proxy_manager import ProxyManager
 from configs.logging_config import get_logger
+from src.api.miniapp_auth import bp as miniapp_auth_bp
+from src.utils.parse_cache import ParseCache
 
 logger = get_logger(__name__)
 
@@ -51,8 +53,13 @@ def create_app(config=None):
     app.config['MAX_CONTENT_LENGTH'] = 32 * 1024
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
     app.config['JSON_SORT_KEYS'] = False
+    app.config['WX_APP_ID'] = os.getenv('WX_APP_ID', '')
+    app.config['WX_APP_SECRET'] = os.getenv('WX_APP_SECRET', '')
+    app.config['PARSE_BUDGET_SECONDS'] = 45
+    app.config['PARSE_CACHE_SECONDS'] = 120
+    app.config['PARSE_MAX_CONCURRENT'] = 2
     app.config['TRUST_PROXY_HEADERS'] = os.getenv(
-        'TRUST_PROXY_HEADERS', ''
+        'TRUST_PROXY_HEADERS', 'true' if os.getenv('RENDER') == 'true' else ''
     ).strip().lower() in {'1', 'true', 'yes', 'on'}
     app.config['API_ONLY'] = os.getenv(
         'API_ONLY', ''
@@ -68,6 +75,9 @@ def create_app(config=None):
     if not app.config.get('SECRET_KEY'):
         app.config['SECRET_KEY'] = _load_or_create_secret(database_dir or app.instance_path)
     init_database(app)
+    app.extensions['miniapp_parse_cache'] = ParseCache(
+        ttl=app.config['PARSE_CACHE_SECONDS'], concurrent=app.config['PARSE_MAX_CONCURRENT'],
+    )
     manager = ProxyManager(app.config["DATABASE"], app.config["DYNAMIC_PROXY_API_URL"])
     app.extensions["proxy_manager"] = manager
     if not app.testing:
@@ -76,7 +86,10 @@ def create_app(config=None):
     # 注册蓝图
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(legacy_media_bp, url_prefix='/api')
-    app.add_url_rule('/health', 'legacy_health', lambda: {'status': 'ok'})
+    app.register_blueprint(miniapp_auth_bp, url_prefix='/api')
+    app.add_url_rule('/health', 'legacy_health', lambda: {
+        'status': 'ok', 'revision': os.getenv('RENDER_GIT_COMMIT', 'local'),
+    })
     if not app.config.get('API_ONLY'):
         register_template_helpers(app)
         app.register_blueprint(web_bp)

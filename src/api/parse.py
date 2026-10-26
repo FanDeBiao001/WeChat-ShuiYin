@@ -8,6 +8,7 @@ from src.utils.parser_transport import (
     Attempt, ParseFailure, ProxyAccessFailure, attempt_context,
 )
 from src.api.response import make_response
+from src.utils.parse_cache import BusyError, WaitTimeout
 from src.db import refund_user_credit, reserve_user_credit
 from src.api.access import (
     authenticate_api_key,
@@ -68,15 +69,44 @@ def parse():
     else:
         text = request.args.get('url') or request.args.get('text')
 
-    result = _execute_parse(text, None)
     # The published WeChat mini-program sends mode=native to this endpoint and
     # expects its original response contract. Keep that contract while other
     # callers continue to receive media-parser's native response.
     if request.method == 'POST' and request.is_json:
         body = request.get_json(silent=True) or {}
         if isinstance(body, dict) and 'mode' in body:
-            return _miniapp_response(result, text)
-    return result
+            return _cached_miniapp_parse(text)
+    return _execute_parse(text, None)
+
+
+def _cached_miniapp_parse(text):
+    started = time.monotonic()
+    url = UrlParser.get_url(text) if isinstance(text, str) and len(text) <= MAX_TEXT_LENGTH else None
+    if not url or not WebFetcher._is_allowed_target(url):
+        return _miniapp_response(_execute_parse(text, None), text)
+
+    def compute():
+        response, status = _execute_parse(text, None)
+        return response.get_json(), status
+
+    try:
+        (body, status), cache_status = current_app.extensions['miniapp_parse_cache'].run(
+            url, compute, wait_seconds=current_app.config['PARSE_BUDGET_SECONDS'],
+            refresh=(request.get_json(silent=True) or {}).get('refresh') is True,
+        )
+        response, status = _miniapp_response((jsonify(body), status), text)
+    except BusyError:
+        response, status = jsonify({'success': False, 'detail': {'code': 'PARSE_BUSY', 'message': '解析服务繁忙，请稍后重试'}}), 429
+        response.headers['Retry-After'] = '2'
+        cache_status = 'busy'
+    except WaitTimeout:
+        response, status = jsonify({'success': False, 'detail': {'code': 'PARSE_TIMEOUT', 'message': '解析超时，请稍后重试'}}), 504
+        cache_status = 'wait_timeout'
+    duration = int((time.monotonic() - started) * 1000)
+    response.headers['Server-Timing'] = f'parse;dur={duration}, cache;desc="{cache_status}"'
+    response.headers['Cache-Control'] = 'no-store'
+    logger.info('miniapp_parse status=%s cache=%s duration_ms=%s', status, cache_status, duration)
+    return response, status
 
 
 @bp.route('/v1/parse', methods=['GET', 'POST'])
@@ -123,10 +153,11 @@ def _miniapp_response(result, source_text):
 
     data = payload.get('data') or {}
     video_url = data.get('video_url') or next(iter(data.get('video_list') or []), '')
-    if not video_url:
+    images = data.get('image_list') or []
+    if not video_url and not images:
         return jsonify({'success': False, 'detail': {
             'code': 'VIDEO_NOT_FOUND',
-            'message': '该分享内容没有可保存的视频',
+            'message': '该分享内容没有可保存的素材',
         }}), 422
 
     title = data.get('title') or data.get('desc') or '视频'
@@ -136,7 +167,10 @@ def _miniapp_response(result, source_text):
         author = {'nickname': str(author)}
     parsed = {
         'platform': data.get('platform') or '',
+        'media_type': 'video' if video_url else 'images',
         'title': title,
+        'description': data.get('desc') or '',
+        'image_list': [media_link(image.get('url') if isinstance(image, dict) else image, title, 'image') for image in images if image],
         'author': author,
         'cover_url': media_link(cover_url, title, 'image') if cover_url else '',
         'video_url': media_link(video_url, title, 'video'),
@@ -189,7 +223,7 @@ def _execute_parse(text, access):
 
         platform = UrlParser.get_platform(share_url)
         redirect_url, platform, parser, content_data = _resolve_and_fetch(
-            share_url, before_parse, started + 90,
+            share_url, before_parse, started + current_app.config['PARSE_BUDGET_SECONDS'],
         )
 
         if (

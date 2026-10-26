@@ -115,8 +115,8 @@ class ParserSession(requests.Session):
             connect = read = timeout
         kwargs["timeout"] = Timeout(
             total=remaining,
-            connect=min(connect or remaining, remaining),
-            read=min(read or remaining, remaining),
+            connect=min(connect or remaining, remaining, 3),
+            read=min(read or remaining, remaining, 8),
         )
         try:
             response = super().send(request, **kwargs)
